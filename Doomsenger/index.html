@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Думсенджер (Doomsenger) — мессенджер</title>
+  <meta name="description" content="Думсенджер (Doomsenger) — тёмный мессенджер с котом. Вход по номеру телефона, чаты, Apple-эмодзи и профиль. Регистрация бесплатно." />
+  <meta name="keywords" content="думсенджер, doomsenger, думсенжер, мессенджер, чат" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#121212" />
+  <link rel="canonical" href="https://illustrious-sunburst-92328f.netlify.app/" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <!-- Превью ссылки в соцсетях и мессенджерах -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Думсенджер" />
+  <meta property="og:title" content="Думсенджер (Doomsenger) — мессенджер" />
+  <meta property="og:description" content="Тёмный мессенджер с котом: вход по номеру телефона, чаты и эмодзи." />
+  <meta property="og:url" content="https://illustrious-sunburst-92328f.netlify.app/" />
+  <meta property="og:locale" content="ru_RU" />
+  <!-- Структурированные данные для поисковиков -->
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebApplication","name":"Думсенджер","alternateName":["Doomsenger","doomsenger","думсенджер"],"url":"https://illustrious-sunburst-92328f.netlify.app/","applicationCategory":"CommunicationApplication","operatingSystem":"Web","inLanguage":"ru","description":"Думсенджер (Doomsenger) — тёмный мессенджер с котом.","offers":{"@type":"Offer","price":"0","priceCurrency":"RUB"}}
+  </script>
+  <style>
+    :root {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --accent: #f39c12; /* жёлто-оранжевый для глаз */
+      --text: #e0e0e0;
+      --border: #333;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden; /* чтобы не было скролла у страницы */
+    }
+
+    /* --- Экран регистрации --- */
+    #screen-register {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      width: 100vw;
+      position: absolute;
+      top: 0; left: 0;
+      z-index: 10;
+      padding: 1rem;
+    }
+    .form-box {
+      background: var(--surface);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      width: 360px;
+      max-width: 100%;
+    }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; margin-bottom: 0.4rem; font-size: 0.9rem; color: #aaa; }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      background: #2c2c2c;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: white;
+      outline: none;
+      color-scheme: dark;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+    button.primary {
+      width: 100%;
+      padding: 1rem;
+      background: var(--accent);
+      border: none;
+      color: #000;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: filter 0.2s;
+    }
+    button.primary:hover { filter: brightness(0.9); }
+    button.primary:disabled { opacity: 0.6; cursor: wait; }
+
+    /* Выбор: вход или регистрация */
+    .auth-choice { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; width: 320px; max-width: 100%; }
+    .auth-choice .app-title { margin: 0 0 1rem; }
+    .auth-choice button { width: 100%; padding: 1rem; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .auth-choice .secondary {
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .auth-choice .secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .auth-choice .primary { border: none; }
+    /* Плавное, но быстрое появление */
+    .pop-in { animation: pop-in 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+    .pop-in.delay-1 { animation-delay: 0.06s; }
+    .pop-in.delay-2 { animation-delay: 0.12s; }
+    @keyframes pop-in {
+      from { opacity: 0; transform: translateY(18px) scale(0.94); }
+      to { opacity: 1; transform: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { .pop-in { animation-duration: 0.01s; } }
+    #screen-register .form-box { position: relative; max-height: 100%; overflow-y: auto; }
+    .back-link {
+      position: absolute; top: 0.9rem; left: 0.9rem;
+      background: none; border: none; color: #aaa;
+      font-size: 1.3rem; cursor: pointer;
+    }
+    .back-link:hover { color: var(--accent); }
+    /* Код подтверждения из SMS */
+    .code-input { letter-spacing: 0.5em; text-align: center; font-size: 1.3rem; }
+    .code-hint { color: #aaa; font-size: 0.8rem; margin: 0.5rem 0 0; text-align: center; }
+    .code-hint button { background: none; border: none; padding: 0; color: var(--accent); font-size: inherit; cursor: pointer; }
+    .code-hint button:disabled { color: #777; cursor: default; }
+    .auth-error { color: #ff6b6b; font-size: 0.85rem; min-height: 1.2em; margin: 0 0 0.8rem; text-align: center; }
+    .logout-btn {
+      width: 100%; margin-top: 0.5rem; padding: 0.9rem;
+      background: none; border: 1px solid #ff6b6b; color: #ff6b6b;
+      border-radius: 8px; font-weight: 600; cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .logout-btn:hover { background: #ff6b6b; color: #000; }
+
+    /* --- Главный экран --- */
+    #screen-main {
+      display: none; /* скрыто по умолчанию, показывается после регистрации */
+      height: 100vh;
+      width: 100vw;
+      flex-direction: row;
+    }
+
+    /* Левая панель с чатами (как в Telegram Web) */
+    .sidebar {
+      width: 380px;
+      max-width: 100%;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+    }
+
+    /* Шапка с котом и поиском */
+    header.top-bar {
+      height: 80px;
+      flex-shrink: 0;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 0 1rem;
+      position: relative;
+    }
+    header.top-bar .cat-container { flex-shrink: 0; transform: scale(0.75); margin: 0 -8px; }
+    .cat-container {
+      position: relative;
+      width: 64px;
+      height: 64px;
+    }
+    .cat-head {
+      width: 100%;
+      height: 100%;
+      background: #a9a9a9; /* серый кот */
+      border-radius: 50%;
+      position: relative;
+      box-shadow: inset -4px -4px 8px rgba(0,0,0,0.3);
+    }
+    /* Ушки */
+    .cat-head::before, .cat-head::after {
+      content: "";
+      position: absolute;
+      top: -8px;
+      width: 0; height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 18px solid #a9a9a9;
+    }
+    .cat-head::before { left: 4px; transform: rotate(-20deg); }
+    .cat-head::after { right: 4px; transform: rotate(20deg); }
+    /* Глаза кота */
+    .eye {
+      position: absolute;
+      width: 14px;
+      height: 18px;
+      background: var(--accent);
+      border-radius: 50%;
+      top: 50%; left: 50%;
+    }
+    .eye.left { transform: translate(-120%, -55%); }
+    .eye.right { transform: translate(20%, -55%); }
+    .pupil {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 4px; height: 12px;
+      background: black;
+      border-radius: 4px;
+    }
+    /* Анимация блеска глаз */
+    @keyframes blink {
+      0% { box-shadow: 0 0 0 rgba(243, 156, 18, 0); }
+      10% { box-shadow: 0 0 12px rgba(243, 156, 18, 0.8); }
+      20% { box-shadow: 0 0 0 rgba(243, 156, 18, 0); }
+      100% { box-shadow: 0 0 0 rgba(243, 156, 18, 0); }
+    }
+    .glow { animation: blink 3s infinite ease-in-out; }
+
+    /* Правая часть: окно чата */
+    .chat-view {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(243, 156, 18, 0.06), transparent 45%),
+        radial-gradient(circle at 80% 80%, rgba(243, 156, 18, 0.04), transparent 50%),
+        var(--bg);
+    }
+    .chat-view-header {
+      height: 64px;
+      flex-shrink: 0;
+      display: none; /* показывается, когда выбран чат */
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0 1.2rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .chat-view-header .chat-avatar { width: 40px; height: 40px; font-size: 1.1rem; }
+    .chat-view-header h2 { margin: 0; font-size: 1rem; }
+    .chat-view-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+    /* Лента сообщений */
+    .messages {
+      flex: 1;
+      display: none; /* показывается, когда в чате есть сообщения */
+      flex-direction: column;
+      gap: 0.35rem;
+      overflow-y: auto;
+      padding: 1rem 1.2rem;
+    }
+    .message {
+      align-self: flex-end;
+      max-width: min(75%, 520px);
+      padding: 0.5rem 0.8rem 0.35rem;
+      background: var(--accent);
+      color: #000;
+      border-radius: 14px 14px 4px 14px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    /* Входящие сообщения собеседника */
+    .message.incoming {
+      align-self: flex-start;
+      background: #2c2c2c;
+      color: var(--text);
+      border-radius: 14px 14px 14px 4px;
+    }
+    .message.incoming time { color: #9a9a9a; }
+    .message.typing { font-style: italic; color: #9a9a9a; }
+    /* Отметка «просмотрено» под последним своим сообщением */
+    .seen-label {
+      align-self: flex-end;
+      margin-top: -0.15rem;
+      padding-right: 0.3rem;
+      font-size: 0.72rem;
+      color: var(--text);
+      opacity: 0.5;
+    }
+    .message time {
+      display: block;
+      text-align: right;
+      font-size: 0.7rem;
+      color: #5a3a00;
+      margin-top: 0.15rem;
+    }
+
+    /* Поле ввода сообщения */
+    .composer {
+      display: none; /* показывается, когда выбран чат */
+      align-items: flex-end;
+      gap: 0.6rem;
+      padding: 0.7rem 1rem;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+    /* Поле ввода — contenteditable, чтобы смайлики в нём были картинками, как в сообщениях */
+    .composer .message-input {
+      flex: 1;
+      min-width: 0;
+      min-height: 44px;
+      max-height: 140px;
+      overflow-y: auto;
+      box-sizing: border-box;
+      padding: 0.6rem 1rem;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      cursor: text;
+      background: #2c2c2c;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      color: white;
+      outline: none;
+      font-size: 0.95rem;
+    }
+    .composer .message-input:focus { border-color: var(--accent); }
+    .composer .message-input:empty::before {
+      content: attr(data-placeholder);
+      color: #8a8a8a;
+      pointer-events: none;
+    }
+    .composer button {
+      flex-shrink: 0;
+      width: 44px; height: 44px;
+      border: none;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #000;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .composer button:hover { filter: brightness(0.9); }
+    /* Кнопка смайликов в строке ввода */
+    .composer .emoji-toggle {
+      background: none;
+      color: #9a9a9a;
+      font-size: 1.5rem;
+      line-height: 1;
+      padding: 0;
+    }
+    .composer .emoji-toggle:hover, .composer .emoji-toggle.active { color: var(--accent); filter: none; }
+    .composer .emoji-toggle svg { width: 26px; height: 26px; display: block; margin: auto; }
+
+    /* Эмодзи в стиле iPhone (картинки Apple, если не загрузились — системный шрифт) */
+    img.emoji {
+      width: 1.25em; height: 1.25em;
+      vertical-align: -0.25em;
+      margin: 0 0.03em;
+    }
+    /* Сообщение только из 1–3 смайликов — крупно и без «пузыря», как в iMessage */
+    .message.jumbo {
+      background: none;
+      padding: 0.1rem 0.2rem;
+      font-size: 2.6rem;
+      line-height: 1.15;
+    }
+    .message.jumbo time { color: #9a9a9a; font-size: 0.7rem; }
+
+    /* Клавиатура эмодзи, как на iPhone */
+    .emoji-panel {
+      display: none;
+      flex-direction: column;
+      height: 290px;
+      background: #2b2b2d;
+      border-top: 1px solid var(--border);
+      user-select: none;
+    }
+    .emoji-panel.open { display: flex; }
+    .emoji-scroll {
+      flex: 1;
+      position: relative; /* offsetTop секций считается от прокрутки */
+      overflow-y: auto;
+      padding: 0 0.4rem;
+      scrollbar-width: none;
+    }
+    .emoji-scroll::-webkit-scrollbar { display: none; }
+    .emoji-section-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #8e8e93;
+      padding: 0.6rem 0.4rem 0.3rem;
+    }
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    }
+    .emoji-grid button {
+      height: 42px;
+      border: none;
+      background: none;
+      border-radius: 8px;
+      font-size: 1.8rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+      transition: transform 0.1s;
+    }
+    .emoji-grid button:hover { background: #3a3a3c; }
+    .emoji-grid button:active { transform: scale(1.3); }
+    .emoji-grid img.emoji { width: 32px; height: 32px; margin: 0; vertical-align: middle; }
+    .emoji-empty { color: #8e8e93; text-align: center; padding: 2rem 0; font-size: 0.9rem; }
+    /* Нижняя полоса категорий */
+    .emoji-tabs {
+      display: flex;
+      align-items: center;
+      gap: 0.1rem;
+      padding: 0.3rem 0.5rem calc(0.3rem + env(safe-area-inset-bottom));
+      border-top: 1px solid #3a3a3c;
+    }
+    .emoji-tabs button {
+      flex: 1;
+      height: 32px;
+      border: none;
+      background: none;
+      border-radius: 50%;
+      color: #8e8e93;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .emoji-tabs button svg { width: 20px; height: 20px; }
+    .emoji-tabs button.active { color: white; background: #48484a; }
+    .emoji-tabs .emoji-backspace { flex: 0 0 44px; border-radius: 8px; }
+    .emoji-tabs .emoji-backspace:hover { color: white; }
+
+    /* Кнопка «назад» — только на мобильных */
+    .back-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.4rem;
+      cursor: pointer;
+      padding: 0 0.4rem 0 0;
+    }
+
+    .chat-view-hint {
+      margin: 0.8rem 0 0;
+      padding: 0.35rem 0.9rem;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 16px;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    /* Заголовок doomsenger */
+    h1.app-title {
+      font-size: 2.2rem;
+      text-transform: lowercase;
+      letter-spacing: 3px;
+      margin: 0;
+      color: var(--text);
+    }
+    h1.app-title span { color: var(--accent); }
+
+    /* Поиск чатов */
+    .search-bar {
+      flex: 1;
+      min-width: 0;
+    }
+    input[type="search"] {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      background: #2c2c2c;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      color: white;
+      outline: none;
+      font-size: 0.95rem;
+    }
+    input[type="search"]:focus { border-color: var(--accent); }
+
+    /* Список чатов */
+    .chats-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 0.5rem 0.5rem;
+    }
+    .chat-item {
+      padding: 0.55rem 0.7rem;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      cursor: pointer;
+    }
+    .chat-item:hover { background: #2a2a2a; }
+    .chat-item.active { background: var(--accent); }
+    .chat-item.active .chat-info p { color: #3a2500; }
+    .chat-item.active .chat-info h3 { color: #000; }
+    .chat-avatar {
+      width: 54px;
+      height: 54px;
+      flex-shrink: 0;
+      background: #555;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+    /* Буква берётся из data-letter, чтобы не попадать в текст для поиска */
+    .chat-avatar::before { content: attr(data-letter); }
+    .chat-info { min-width: 0; flex: 1; }
+    .chat-info h3 { margin: 0 0 0.2rem; font-size: 1rem; font-weight: 600; }
+    .chat-info p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #aaa;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .empty { text-align: center; color: #777; padding: 2rem; display: none; }
+    /* Пустой список чатов */
+    .no-chats {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100%;
+      min-height: 240px;
+      color: #777;
+      padding: 2rem;
+    }
+    .no-chats-icon { font-size: 3rem; margin-bottom: 0.8rem; opacity: 0.6; }
+    .no-chats h3 { margin: 0 0 0.4rem; color: var(--text); font-size: 1.15rem; }
+    .no-chats p { margin: 0; font-size: 0.9rem; }
+
+    /* Аватарка профиля в шапке */
+    .profile-avatar {
+      width: 44px; height: 44px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      border: none;
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      text-transform: uppercase;
+    }
+    .profile-avatar:hover { filter: brightness(0.9); }
+
+    /* Страница профиля */
+    .profile-page {
+      display: none;
+      position: fixed; inset: 0;
+      z-index: 20;
+      background: rgba(0, 0, 0, 0.6);
+      align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .profile-card {
+      background: var(--surface);
+      border-radius: 14px;
+      width: 560px; max-width: 100%;
+      max-height: 100%;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    .profile-head { text-align: center; padding: 2rem 1.5rem 1rem; }
+    .profile-head .profile-avatar { width: 96px; height: 96px; font-size: 2rem; margin: 0 auto 0.8rem; cursor: default; }
+    .profile-head .profile-avatar:hover { filter: none; }
+    /* Аватарка с фото */
+    .profile-avatar.has-photo {
+      background-size: cover;
+      background-position: center;
+      color: transparent;
+    }
+    /* Большая аватарка в профиле: по нажатию — выбор фото */
+    .avatar-picker {
+      position: relative;
+      display: block;
+      width: 96px;
+      margin: 0 auto 0.8rem;
+      padding: 0;
+      border: none;
+      background: none;
+      cursor: pointer;
+    }
+    .avatar-picker .profile-avatar { margin: 0; cursor: pointer; }
+    .avatar-picker .camera-badge {
+      position: absolute;
+      right: -2px; bottom: -2px;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: #2c2c2c;
+      border: 3px solid var(--surface);
+      color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .avatar-picker .camera-badge svg { width: 18px; height: 18px; }
+    .avatar-picker:hover .camera-badge { background: var(--accent); color: #000; }
+    .avatar-picker:hover .profile-avatar { filter: brightness(0.85); }
+    .profile-head h2 { margin: 0; }
+    .close-btn {
+      position: absolute; top: 0.8rem; right: 0.8rem;
+      background: none; border: none; color: #aaa;
+      font-size: 1.4rem; cursor: pointer;
+    }
+    .close-btn:hover { color: var(--accent); }
+    .tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0 1rem; border-bottom: 1px solid var(--border); }
+    .tab {
+      background: none; border: none; color: #aaa;
+      padding: 0.7rem 0.8rem; cursor: pointer; font-size: 0.9rem;
+      border-bottom: 2px solid transparent;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-panel { display: none; padding: 1.5rem; }
+    .tab-panel.active { display: block; }
+    .field-label { font-size: 0.85rem; color: #aaa; margin: 0 0 0.3rem; }
+    .field-value { font-size: 1.05rem; margin: 0 0 1rem; word-break: break-all; }
+    .profile-card textarea {
+      width: 100%; min-height: 120px; resize: vertical;
+      padding: 0.75rem; background: #2c2c2c;
+      border: 1px solid var(--border); border-radius: 6px;
+      color: white; outline: none; font: inherit;
+    }
+    .profile-card textarea:focus { border-color: var(--accent); }
+    .saved-note { color: var(--accent); font-size: 0.85rem; margin: 0.5rem 0 0; min-height: 1.2em; }
+    .accounts-list { list-style: none; padding: 0; margin: 0 0 1rem; }
+    .accounts-list li { padding: 0.6rem 0.8rem; background: #252525; border-radius: 8px; margin-bottom: 0.4rem; word-break: break-all; }
+
+    /* Окно добавления аккаунта */
+    .modal {
+      display: none;
+      position: fixed; inset: 0;
+      z-index: 30;
+      background: rgba(0, 0, 0, 0.6);
+      align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+
+    /* Мобильные экраны: только список чатов, как в мобильном Telegram */
+    @media (max-width: 720px) {
+      .sidebar { width: 100%; border-right: none; }
+      .chat-view { display: none; }
+      /* Открытый чат занимает весь экран */
+      #screen-main.chat-open .sidebar { display: none; }
+      #screen-main.chat-open .chat-view { display: flex; }
+      .back-btn { display: block; }
+    }
+
+    /* Скроллбар */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+    /* Текст для поисковиков, визуально скрыт */
+    .seo-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  </style>
+</head>
+<body>
+
+  <!-- Экран регистрации -->
+  <div id="screen-register">
+    <!-- Выбор: вход или регистрация -->
+    <div class="auth-choice" id="auth-choice">
+      <h1 class="app-title pop-in" aria-label="Думсенджер (Doomsenger)">doom<span>senger</span></h1>
+      <p class="seo-hidden">Думсенджер (Doomsenger) — мессенджер с котом. Войдите по номеру телефона или зарегистрируйтесь.</p>
+      <button type="button" class="primary pop-in delay-1" id="show-login">Вход</button>
+      <button type="button" class="secondary pop-in delay-2" id="show-register">Регистрация</button>
+    </div>
+
+    <!-- Вход -->
+    <div class="form-box" id="login-box" hidden>
+      <button type="button" class="back-link" data-auth-back title="Назад">←</button>
+      <h2 style="margin-top:0; margin-bottom:1.5rem; text-align:center;">Вход</h2>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-phone">Номер телефона</label>
+          <input type="tel" id="login-phone" placeholder="+7 (999) 000-00-00" autocomplete="tel" required />
+        </div>
+        <div class="form-group code-group" hidden>
+          <label for="login-code">Код из SMS</label>
+          <input type="text" id="login-code" class="code-input" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="one-time-code" />
+          <p class="code-hint"></p>
+        </div>
+        <p class="auth-error" id="login-error"></p>
+        <button type="submit" class="primary" data-label-code="Получить код" data-label-done="Войти">Получить код</button>
+      </form>
+    </div>
+
+    <!-- Регистрация -->
+    <div class="form-box" id="register-box" hidden>
+      <button type="button" class="back-link" data-auth-back title="Назад">←</button>
+      <h2 style="margin-top:0; margin-bottom:1.5rem; text-align:center;">Регистрация</h2>
+      <form id="reg-form">
+        <div class="form-group">
+          <label for="first-name">Имя</label>
+          <input type="text" id="first-name" placeholder="Иван" required />
+        </div>
+        <div class="form-group">
+          <label for="last-name">Фамилия</label>
+          <input type="text" id="last-name" placeholder="Иванов" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Почта</label>
+          <input type="email" id="email" placeholder="name@example.com" autocomplete="username" required />
+        </div>
+        <div class="form-group">
+          <label for="phone">Номер телефона</label>
+          <input type="tel" id="phone" placeholder="+7 (999) 000-00-00" autocomplete="tel" required />
+        </div>
+        <div class="form-group">
+          <label for="gender">Пол</label>
+          <select id="gender" required>
+            <option value="" disabled selected>Выберите пол</option>
+            <option value="male">Мужской</option>
+            <option value="female">Женский</option>
+            <option value="other">Другой</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="dob">Дата рождения</label>
+          <input type="date" id="dob" required />
+        </div>
+        <div class="form-group code-group" hidden>
+          <label for="reg-code">Код из SMS</label>
+          <input type="text" id="reg-code" class="code-input" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="one-time-code" />
+          <p class="code-hint"></p>
+        </div>
+        <p class="auth-error" id="reg-error"></p>
+        <button type="submit" class="primary" data-label-code="Получить код" data-label-done="Зарегистрироваться">Получить код</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Главный экран -->
+  <div id="screen-main">
+    <!-- Левая панель: кот, поиск и список чатов -->
+    <aside class="sidebar">
+    <!-- Шапка с котом и поиском -->
+    <header class="top-bar">
+      <!-- Аватарка профиля -->
+      <button type="button" class="profile-avatar" id="profile-avatar" title="Профиль"></button>
+      <div class="cat-container">
+        <div class="cat-head">
+          <!-- Левый глаз -->
+          <div class="eye left glow">
+            <div class="pupil"></div>
+          </div>
+          <!-- Правый глаз -->
+          <div class="eye right glow">
+            <div class="pupil"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Поиск чатов -->
+      <section class="search-bar">
+        <input type="search" id="chat-search" placeholder="поиск чатов" />
+      </section>
+    </header>
+
+    <!-- Чаты -->
+    <div class="chats-list" id="chats-list">
+      <!-- Пустое состояние: показывается, пока чатов нет -->
+      <div class="no-chats" id="no-chats">
+        <div class="no-chats-icon">💬</div>
+        <h3>Пока чатов нет</h3>
+        <p>Когда появятся новые чаты, они будут здесь</p>
+      </div>
+      <div class="empty" id="no-results">Ничего не найдено</div>
+    </div>
+    </aside>
+
+    <!-- Правая часть: окно выбранного чата -->
+    <main class="chat-view">
+      <div class="chat-view-header" id="chat-view-header">
+        <button type="button" class="back-btn" id="chat-back" title="Назад">←</button>
+        <div class="chat-avatar" id="chat-view-avatar"></div>
+        <h2 id="chat-view-name"></h2>
+      </div>
+      <div class="chat-view-body">
+        <!-- Заголовок -->
+        <h1 class="app-title">doom<span>senger</span></h1>
+        <p class="chat-view-hint" id="chat-view-hint">Выберите чат, чтобы начать переписку</p>
+      </div>
+      <!-- Сообщения выбранного чата -->
+      <div class="messages" id="messages"></div>
+      <!-- Клавиатура эмодзи -->
+      <div class="emoji-panel" id="emoji-panel">
+        <div class="emoji-scroll" id="emoji-scroll"></div>
+        <div class="emoji-tabs" id="emoji-tabs"></div>
+      </div>
+      <!-- Поле ввода -->
+      <form class="composer" id="composer">
+        <div class="message-input" id="message-input" contenteditable="true" role="textbox" aria-label="Сообщение" data-placeholder="Сообщение" spellcheck="true"></div>
+        <button type="button" class="emoji-toggle" id="emoji-toggle" title="Смайлики">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M8 14.5c1 1.4 2.4 2 4 2s3-.6 4-2"/><circle cx="9" cy="9.8" r="0.6" fill="currentColor"/><circle cx="15" cy="9.8" r="0.6" fill="currentColor"/></svg>
+        </button>
+        <button type="submit" title="Отправить">➤</button>
+      </form>
+    </main>
+  </div>
+
+  <!-- Страница профиля -->
+  <div class="profile-page" id="profile-page">
+    <div class="profile-card">
+      <button type="button" class="close-btn" id="profile-close" title="Закрыть">✕</button>
+      <div class="profile-head">
+        <button type="button" class="avatar-picker" id="avatar-picker" title="Выбрать фото">
+          <div class="profile-avatar" id="profile-big-avatar"></div>
+          <span class="camera-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg>
+          </span>
+        </button>
+        <input type="file" id="avatar-file" accept="image/*" hidden />
+        <h2 id="profile-name"></h2>
+      </div>
+      <nav class="tabs">
+        <button type="button" class="tab active" data-tab="account">Аккаунт</button>
+        <button type="button" class="tab" data-tab="nick">Ник</button>
+        <button type="button" class="tab" data-tab="phone">Телефон</button>
+        <button type="button" class="tab" data-tab="about">О себе</button>
+        <button type="button" class="tab" data-tab="birthday">День рождения</button>
+        <button type="button" class="tab" data-tab="add">Добавить аккаунт</button>
+      </nav>
+      <section class="tab-panel active" id="tab-account">
+        <p class="field-label">Почта, привязанная к аккаунту</p>
+        <p class="field-value" id="profile-email"></p>
+        <button type="button" class="logout-btn" id="logout-btn">Выход из аккаунта</button>
+      </section>
+      <section class="tab-panel" id="tab-nick">
+        <form id="nick-form">
+          <div class="form-group">
+            <label for="profile-nick">Ник</label>
+            <input type="text" id="profile-nick" maxlength="32" placeholder="Как вас называть" required />
+          </div>
+          <p class="saved-note" id="nick-saved"></p>
+          <button type="submit" class="primary">Сохранить</button>
+        </form>
+      </section>
+      <section class="tab-panel" id="tab-phone">
+        <p class="field-label">Телефон</p>
+        <p class="field-value" id="profile-phone"></p>
+      </section>
+      <section class="tab-panel" id="tab-about">
+        <p class="field-label">Расскажите о себе</p>
+        <textarea id="profile-about" placeholder="Напишите что-нибудь о себе"></textarea>
+        <p class="saved-note" id="about-saved"></p>
+        <button type="button" class="primary" id="about-save">Сохранить</button>
+      </section>
+      <section class="tab-panel" id="tab-birthday">
+        <p class="field-label">День рождения</p>
+        <p class="field-value" id="profile-birthday"></p>
+      </section>
+      <section class="tab-panel" id="tab-add">
+        <p class="field-label">Аккаунты</p>
+        <ul class="accounts-list" id="accounts-list"></ul>
+        <button type="button" class="primary" id="add-account-open">Добавить аккаунт</button>
+      </section>
+    </div>
+  </div>
+
+  <!-- Окно добавления аккаунта -->
+  <div class="modal" id="add-account-modal">
+    <div class="form-box" style="position:relative;">
+      <button type="button" class="close-btn" id="add-account-close" title="Закрыть">✕</button>
+      <h2 style="margin-top:0; margin-bottom:1.5rem; text-align:center;">Добавить аккаунт</h2>
+      <form id="add-account-form">
+        <div class="form-group">
+          <label for="new-email">Другая почта</label>
+          <input type="email" id="new-email" placeholder="name@example.com" required />
+        </div>
+        <button type="submit" class="primary">Добавить</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const regScreen = document.getElementById('screen-register');
+    const mainScreen = document.getElementById('screen-main');
+    const form = document.getElementById('reg-form');
+    const search = document.getElementById('chat-search');
+    const noResults = document.getElementById('no-results');
+
+    // --- Вход и регистрация (аккаунты хранятся в базе мессенджера) ---
+    const authChoice = document.getElementById('auth-choice');
+    const loginBox = document.getElementById('login-box');
+    const registerBox = document.getElementById('register-box');
+    const loginForm = document.getElementById('login-form');
+    const TOKEN_KEY = 'doomsenger-token';
+
+    // Показать один из блоков экрана входа с анимацией появления
+    function showAuth(box) {
+      [authChoice, loginBox, registerBox].forEach((el) => {
+        el.hidden = el !== box;
+        el.classList.remove('pop-in');
+      });
+      void box.offsetWidth; // перезапуск анимации
+      box.classList.add('pop-in');
+      // Кнопки на выборе анимируются по отдельности
+      authChoice.querySelectorAll('.pop-in').forEach((el) => {
+        el.classList.remove('pop-in');
+        void el.offsetWidth;
+        el.classList.add('pop-in');
+      });
+      document.getElementById('login-error').textContent = '';
+      document.getElementById('reg-error').textContent = '';
+      resetCodeStep(loginForm);
+      resetCodeStep(form);
+    }
+    document.getElementById('show-login').addEventListener('click', () => {
+      showAuth(loginBox);
+      document.getElementById('login-phone').focus();
+    });
+    document.getElementById('show-register').addEventListener('click', () => {
+      showAuth(registerBox);
+      document.getElementById('first-name').focus();
+    });
+    document.querySelectorAll('[data-auth-back]').forEach((btn) => {
+      btn.addEventListener('click', () => showAuth(authChoice));
+    });
+
+    // Запрос к API аккаунтов
+    async function api(path, method = 'GET', body) {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (token) headers.Authorization = `Bearer ${token}`;
+      const res = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+      const data = res.status === 204 ? {} : await res.json().catch(() => ({}));
+      if (!res.ok) throw Object.assign(new Error(data.error || 'Ошибка сервера'), { status: res.status });
+      return data;
+    }
+
+    // Вход в приложение после успешной авторизации
+    function enterApp(data) {
+      Object.assign(user, data.user);
+      accounts = [user.email];
+      fillProfile();
+      regScreen.style.display = 'none';
+      mainScreen.style.display = 'flex';
+    }
+
+    // --- Подтверждение по коду из SMS ---
+    // Первое нажатие кнопки отправляет код на телефон, второе — проверяет его
+    const codeTimers = new Map();
+
+    function resetCodeStep(formEl) {
+      const group = formEl.querySelector('.code-group');
+      const button = formEl.querySelector('button[type="submit"]');
+      group.hidden = true;
+      group.querySelector('.code-input').value = '';
+      group.querySelector('.code-input').required = false;
+      button.textContent = button.dataset.labelCode;
+      clearInterval(codeTimers.get(formEl));
+    }
+
+    // Подсказка «Код отправлен…» с обратным отсчётом до повторной отправки
+    function showCodeHint(formEl, phone, purpose, errorEl) {
+      const hint = formEl.querySelector('.code-hint');
+      hint.textContent = `Код отправлен на ${phone}. `;
+      const resend = document.createElement('button');
+      resend.type = 'button';
+      hint.append(resend);
+      let left = 60;
+      const tick = () => {
+        resend.disabled = left > 0;
+        resend.textContent = left > 0 ? `Отправить ещё раз через ${left} с` : 'Отправить ещё раз';
+        if (left-- <= 0) clearInterval(codeTimers.get(formEl));
+      };
+      clearInterval(codeTimers.get(formEl));
+      tick();
+      codeTimers.set(formEl, setInterval(tick, 1000));
+      resend.addEventListener('click', () => requestCode(formEl, purpose, errorEl));
+    }
+
+    async function requestCode(formEl, purpose, errorEl) {
+      const phoneInput = formEl.querySelector('input[type="tel"]');
+      const button = formEl.querySelector('button[type="submit"]');
+      const group = formEl.querySelector('.code-group');
+      errorEl.textContent = '';
+      button.disabled = true;
+      try {
+        const data = await api('/api/auth/code', 'POST', { phone: phoneInput.value.trim(), purpose });
+        group.hidden = false;
+        group.classList.remove('pop-in');
+        void group.offsetWidth;
+        group.classList.add('pop-in');
+        group.querySelector('.code-input').required = true;
+        group.querySelector('.code-input').focus();
+        button.textContent = button.dataset.labelDone;
+        showCodeHint(formEl, data.phone, purpose, errorEl);
+      } catch (err) {
+        errorEl.textContent = err.status ? err.message : 'Нет связи с сервером';
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    // Отправка формы входа/регистрации вместе с кодом
+    async function submitAuth(formEl, errorEl, path, body) {
+      const button = formEl.querySelector('button[type="submit"]');
+      errorEl.textContent = '';
+      button.disabled = true;
+      try {
+        const data = await api(path, 'POST', body);
+        localStorage.setItem(TOKEN_KEY, data.token);
+        formEl.reset();
+        resetCodeStep(formEl);
+        enterApp(data);
+      } catch (err) {
+        errorEl.textContent = err.status ? err.message : 'Нет связи с сервером';
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    // В поле кода — только цифры
+    document.querySelectorAll('.code-input').forEach((input) => {
+      input.addEventListener('input', () => { input.value = input.value.replace(/\D/g, '').slice(0, 6); });
+    });
+    // Если номер изменили — код нужно запросить заново
+    [loginForm, form].forEach((formEl) => {
+      formEl.querySelector('input[type="tel"]').addEventListener('input', () => resetCodeStep(formEl));
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const errorEl = document.getElementById('reg-error');
+      if (form.querySelector('.code-group').hidden) return requestCode(form, 'register', errorEl);
+      submitAuth(form, errorEl, '/api/auth/register', {
+        firstName: document.getElementById('first-name').value.trim(),
+        lastName: document.getElementById('last-name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        gender: document.getElementById('gender').value,
+        dob: document.getElementById('dob').value,
+        code: document.getElementById('reg-code').value.trim(),
+      });
+    });
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const errorEl = document.getElementById('login-error');
+      if (loginForm.querySelector('.code-group').hidden) return requestCode(loginForm, 'login', errorEl);
+      submitAuth(loginForm, errorEl, '/api/auth/login', {
+        phone: document.getElementById('login-phone').value.trim(),
+        code: document.getElementById('login-code').value.trim(),
+      });
+    });
+
+    // Сохранение изменений профиля в базе
+    function saveProfile(changes) {
+      return api('/api/me', 'PATCH', changes).catch(() => alert('Не удалось сохранить изменения'));
+    }
+
+    const chatsList = document.getElementById('chats-list');
+    const noChats = document.getElementById('no-chats');
+
+    // Список чатов. Новые чаты добавляйте через addChat()
+    const chats = [
+      { name: 'Мама', lastMessage: '', color: '#e84393', messages: [] },
+    ];
+
+    // Первая буква имени для аватарки
+    function firstLetter(name) {
+      return (name || '').trim().charAt(0).toUpperCase();
+    }
+
+    // Отрисовка списка чатов
+    function renderChats() {
+      chatsList.querySelectorAll('.chat-item').forEach((item) => item.remove());
+      chats.forEach((chat) => {
+        const item = document.createElement('div');
+        item.className = 'chat-item';
+        const avatar = document.createElement('div');
+        avatar.className = 'chat-avatar';
+        if (chat.color) avatar.style.background = chat.color;
+        avatar.dataset.letter = firstLetter(chat.name);
+        const info = document.createElement('div');
+        info.className = 'chat-info';
+        const name = document.createElement('h3');
+        name.textContent = chat.name;
+        const last = document.createElement('p');
+        appendEmojiText(last, chat.lastMessage || '');
+        info.append(name, last);
+        item.append(avatar, info);
+        if (chat === activeChat) item.classList.add('active');
+        item.addEventListener('click', () => openChat(chat));
+        chatsList.insertBefore(item, noResults);
+      });
+      applySearch();
+    }
+
+    // Открытие чата в правой части
+    const viewHeader = document.getElementById('chat-view-header');
+    const viewAvatar = document.getElementById('chat-view-avatar');
+    const viewName = document.getElementById('chat-view-name');
+    const viewHint = document.getElementById('chat-view-hint');
+    const viewBody = document.querySelector('.chat-view-body');
+    const messagesEl = document.getElementById('messages');
+    const composer = document.getElementById('composer');
+    const messageInput = document.getElementById('message-input');
+    let activeChat = null;
+
+    function openChat(chat) {
+      activeChat = chat;
+      viewHeader.style.display = 'flex';
+      composer.style.display = 'flex';
+      mainScreen.classList.add('chat-open');
+      viewAvatar.style.background = chat.color || '';
+      viewAvatar.dataset.letter = firstLetter(chat.name);
+      viewName.textContent = chat.name;
+      viewHint.textContent = 'Сообщений пока нет';
+      renderMessages();
+      renderChats();
+      messageInput.focus();
+    }
+
+    // Отрисовка сообщений открытого чата
+    function renderMessages() {
+      const list = activeChat.messages;
+      messagesEl.innerHTML = '';
+      // Последнее своё сообщение — под ним показываем «просмотрено»
+      let lastMine = -1;
+      list.forEach((msg, i) => { if (msg.fromMe !== false) lastMine = i; });
+      list.forEach((msg, i) => {
+        const bubble = document.createElement('div');
+        bubble.className = msg.fromMe === false ? 'message incoming' : 'message';
+        appendEmojiText(bubble, msg.text);
+        if (isEmojiOnly(msg.text)) bubble.classList.add('jumbo');
+        const time = document.createElement('time');
+        time.textContent = msg.time.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        bubble.append(time);
+        messagesEl.append(bubble);
+        if (i === lastMine && msg.seen) {
+          const seen = document.createElement('div');
+          seen.className = 'seen-label';
+          seen.textContent = 'просмотрено';
+          messagesEl.append(seen);
+        }
+      });
+      // Собеседник набирает ответ
+      if (activeChat.typing) {
+        const typing = document.createElement('div');
+        typing.className = 'message incoming typing';
+        typing.textContent = 'печатает…';
+        messagesEl.append(typing);
+      }
+      // Пока сообщений нет — показываем заглушку с подсказкой
+      viewBody.style.display = list.length ? 'none' : 'flex';
+      messagesEl.style.display = list.length ? 'flex' : 'none';
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    // Отправка сообщения
+    composer.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = getInputText().trim();
+      if (!text || !activeChat) return;
+      activeChat.messages.push({ text, time: new Date(), fromMe: true });
+      activeChat.lastMessage = text;
+      setInputText('', 0);
+      renderMessages();
+      renderChats();
+      requestReply(activeChat);
+    });
+
+    // --- Смайлики, как на iPhone ---
+    // Картинки эмодзи Apple; если не загрузились — показываем системный символ
+    const EMOJI_CDN = 'https://cdn.jsdelivr.net/npm/emoji-datasource-apple@15.1.2/img/apple/64/';
+    // Делим текст на символы так, чтобы составные эмодзи (флаги, семьи) не распадались
+    const graphemes = window.Intl && Intl.Segmenter
+      ? new Intl.Segmenter('ru', { granularity: 'grapheme' })
+      : { segment: (text) => (text.match(/\p{Regional_Indicator}{2}|\P{M}\p{M}*(?:\u200d\P{M}\p{M}*)*|./gsu) || []).map((segment) => ({ segment })) };
+    const emojiRe = /\p{Extended_Pictographic}|\p{Regional_Indicator}|\u20e3/u;
+
+    function emojiCode(emoji) {
+      return [...emoji].map((ch) => ch.codePointAt(0).toString(16).padStart(4, '0')).join('-');
+    }
+
+    function emojiImg(emoji) {
+      const img = document.createElement('img');
+      img.className = 'emoji';
+      img.alt = emoji;
+      img.draggable = false;
+      const code = emojiCode(emoji);
+      img.src = EMOJI_CDN + code + '.png';
+      img.onerror = () => {
+        // Вторая попытка — без селектора варианта (fe0f), иначе — обычный текст
+        const short = code.replace(/-fe0f/g, '');
+        if (img.src.endsWith('/' + code + '.png') && short !== code) img.src = EMOJI_CDN + short + '.png';
+        else img.replaceWith(emoji);
+      };
+      return img;
+    }
+
+    // Вставляет текст в элемент, заменяя эмодзи на картинки
+    function appendEmojiText(el, text) {
+      let buffer = '';
+      for (const { segment } of graphemes.segment(text)) {
+        if (emojiRe.test(segment)) {
+          if (buffer) el.append(buffer);
+          buffer = '';
+          el.append(emojiImg(segment));
+        } else {
+          buffer += segment;
+        }
+      }
+      if (buffer) el.append(buffer);
+    }
+
+    // Сообщение состоит только из 1–3 эмодзи
+    function isEmojiOnly(text) {
+      const parts = [...graphemes.segment(text.replace(/\s+/g, ''))].map((s) => s.segment);
+      return parts.length > 0 && parts.length <= 3 && parts.every((p) => emojiRe.test(p));
+    }
+
+    // Категории — в том же порядке, что на клавиатуре iPhone
+    const emojiCategories = [
+      { id: 'recent', title: 'Часто используемые', icon: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', list: [] },
+      { id: 'smileys', title: 'Смайлики и люди', icon: '<circle cx="12" cy="12" r="9"/><path d="M8 14c1 1.5 2.3 2.2 4 2.2s3-.7 4-2.2"/><path d="M9 9.5v.5M15 9.5v.5"/>',
+        list: '😀 😃 😄 😁 😆 😅 😂 🤣 🥲 ☺️ 😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😝 😜 🤪 🤨 🧐 🤓 😎 🥸 🤩 🥳 😏 😒 😞 😔 😟 😕 🙁 ☹️ 😣 😖 😫 😩 🥺 😢 😭 😤 😠 😡 🤬 🤯 😳 🥵 🥶 😱 😨 😰 😥 😓 🤗 🤔 🫣 🤭 🫢 🫡 🤫 🫠 🤥 😶 🫥 😐 🫤 😑 😬 🙄 😯 😦 😧 😮 😲 🥱 😴 🤤 😪 😵 🤐 🥴 🤢 🤮 🤧 😷 🤒 🤕 🤑 🤠 😈 👿 👹 👺 🤡 💩 👻 💀 ☠️ 👽 👾 🤖 🎃 😺 😸 😹 😻 😼 😽 🙀 😿 😾 👋 🤚 🖐️ ✋ 🖖 👌 🤌 🤏 ✌️ 🤞 🫰 🤟 🤘 🤙 👈 👉 👆 👇 ☝️ 👍 👎 ✊ 👊 🤛 🤜 👏 🙌 🫶 👐 🤲 🤝 🙏 ✍️ 💅 🤳 💪 🦾 👀 👁️ 👅 👄 🫦 💋 🧠 👶 🧒 👦 👧 🧑 👱 👨 🧔 👩 🧓 👴 👵 🙍 🙎 🙅 🙆 💁 🙋 🧏 🙇 🤦 🤷 👮 🕵️ 💂 🥷 👷 🤴 👸 👳 👲 🧕 🤵 👰 🤰 🤱 👼 🎅 🤶 🦸 🦹 🧙 🧚 🧛 🧜 🧝 🧞 🧟 💆 💇 🚶 🧍 🧎 🏃 💃 🕺 👯 🧖 🧗 👫 👭 👬 💏 💑 👪 🗣️ 👤 👥 🫂 👣'.split(' ') },
+      { id: 'animals', title: 'Животные и природа', icon: '<circle cx="7" cy="8" r="2"/><circle cx="17" cy="8" r="2"/><circle cx="12" cy="14" r="6"/><path d="M10.5 13v.5M13.5 13v.5M11 16h2"/>',
+        list: '🐶 🐱 🐭 🐹 🐰 🦊 🐻 🐼 🐻‍❄️ 🐨 🐯 🦁 🐮 🐷 🐽 🐸 🐵 🙈 🙉 🙊 🐒 🐔 🐧 🐦 🐤 🐣 🐥 🦆 🦅 🦉 🦇 🐺 🐗 🐴 🦄 🐝 🪱 🐛 🦋 🐌 🐞 🐜 🪰 🪲 🪳 🦟 🦗 🕷️ 🕸️ 🦂 🐢 🐍 🦎 🦖 🦕 🐙 🦑 🦐 🦞 🦀 🐡 🐠 🐟 🐬 🐳 🐋 🦈 🦭 🐊 🐅 🐆 🦓 🦍 🦧 🦣 🐘 🦛 🦏 🐪 🐫 🦒 🦘 🦬 🐃 🐂 🐄 🐎 🐖 🐏 🐑 🦙 🐐 🦌 🐕 🐩 🦮 🐈 🐈‍⬛ 🪶 🐓 🦃 🦤 🦚 🦜 🦢 🦩 🕊️ 🐇 🦝 🦨 🦡 🦫 🦦 🦥 🐁 🐀 🐿️ 🦔 🐾 🐉 🐲 🌵 🎄 🌲 🌳 🌴 🪵 🌱 🌿 ☘️ 🍀 🎍 🪴 🎋 🍃 🍂 🍁 🍄 🐚 🪨 🌾 💐 🌷 🌹 🥀 🌺 🌸 🌼 🌻 🌞 🌝 🌛 🌜 🌚 🌕 🌖 🌗 🌘 🌑 🌒 🌓 🌔 🌙 🌎 🌍 🌏 🪐 💫 ⭐ 🌟 ✨ ⚡ ☄️ 💥 🔥 🌪️ 🌈 ☀️ 🌤️ ⛅ 🌥️ ☁️ 🌦️ 🌧️ ⛈️ 🌩️ 🌨️ ❄️ ☃️ ⛄ 🌬️ 💨 💧 💦 ☔ ☂️ 🌊 🌫️'.split(' ') },
+      { id: 'food', title: 'Еда и напитки', icon: '<path d="M12 7c-4-2-7 1-7 5 0 4 3 8 7 8s7-4 7-8c0-4-3-7-7-5z"/><path d="M12 7c0-2 1-3.5 3-4"/>',
+        list: '🍏 🍎 🍐 🍊 🍋 🍌 🍉 🍇 🍓 🫐 🍈 🍒 🍑 🥭 🍍 🥥 🥝 🍅 🍆 🥑 🥦 🥬 🥒 🌶️ 🫑 🌽 🥕 🫒 🧄 🧅 🥔 🍠 🥐 🥯 🍞 🥖 🥨 🧀 🥚 🍳 🧈 🥞 🧇 🥓 🥩 🍗 🍖 🌭 🍔 🍟 🍕 🫓 🥪 🥙 🧆 🌮 🌯 🫔 🥗 🥘 🫕 🥫 🍝 🍜 🍲 🍛 🍣 🍱 🥟 🦪 🍤 🍙 🍚 🍘 🍥 🥠 🥮 🍢 🍡 🍧 🍨 🍦 🥧 🧁 🍰 🎂 🍮 🍭 🍬 🍫 🍿 🍩 🍪 🌰 🥜 🍯 🥛 🍼 🫖 ☕ 🍵 🧃 🥤 🧋 🍶 🍺 🍻 🥂 🍷 🥃 🍸 🍹 🧉 🍾 🧊 🥄 🍴 🍽️ 🥣 🥡 🥢 🧂'.split(' ') },
+      { id: 'activity', title: 'Активность', icon: '<circle cx="12" cy="12" r="9"/><path d="M3.5 9.5c3 1 6 .5 8.5-2.5M20.5 14.5c-3-1-6-.5-8.5 2.5M8 20c0-4 4-8 12-8.5"/>',
+        list: '⚽ 🏀 🏈 ⚾ 🥎 🎾 🏐 🏉 🥏 🎱 🪀 🏓 🏸 🏒 🏑 🥍 🏏 🪃 🥅 ⛳ 🪁 🏹 🎣 🤿 🥊 🥋 🎽 🛹 🛼 🛷 ⛸️ 🥌 🎿 ⛷️ 🏂 🪂 🏋️ 🤼 🤸 ⛹️ 🤺 🤾 🏌️ 🏇 🧘 🏄 🏊 🤽 🚣 🧗 🚵 🚴 🏆 🥇 🥈 🥉 🏅 🎖️ 🏵️ 🎗️ 🎫 🎟️ 🎪 🤹 🎭 🩰 🎨 🎬 🎤 🎧 🎼 🎹 🥁 🪘 🎷 🎺 🪗 🎸 🪕 🎻 🎲 ♟️ 🎯 🎳 🎮 🎰 🧩'.split(' ') },
+      { id: 'travel', title: 'Путешествия и места', icon: '<path d="M4 15l1.5-5A2 2 0 0 1 7.4 8.5h9.2a2 2 0 0 1 1.9 1.5L20 15v3H4z"/><circle cx="7.5" cy="15.5" r="1"/><circle cx="16.5" cy="15.5" r="1"/>',
+        list: '🚗 🚕 🚙 🚌 🚎 🏎️ 🚓 🚑 🚒 🚐 🛻 🚚 🚛 🚜 🦯 🦽 🦼 🛴 🚲 🛵 🏍️ 🛺 🚨 🚔 🚍 🚘 🚖 🚡 🚠 🚟 🚃 🚋 🚞 🚝 🚄 🚅 🚈 🚂 🚆 🚇 🚊 🚉 ✈️ 🛫 🛬 🛩️ 💺 🛰️ 🚀 🛸 🚁 🛶 ⛵ 🚤 🛥️ 🛳️ ⛴️ 🚢 ⚓ 🪝 ⛽ 🚧 🚦 🚥 🚏 🗺️ 🗿 🗽 🗼 🏰 🏯 🏟️ 🎡 🎢 🎠 ⛲ ⛱️ 🏖️ 🏝️ 🏜️ 🌋 ⛰️ 🏔️ 🗻 🏕️ ⛺ 🛖 🏠 🏡 🏘️ 🏚️ 🏗️ 🏭 🏢 🏬 🏣 🏤 🏥 🏦 🏨 🏪 🏫 🏩 💒 🏛️ ⛪ 🕌 🕍 🛕 🕋 ⛩️ 🛤️ 🛣️ 🗾 🎑 🏞️ 🌅 🌄 🌠 🎇 🎆 🌇 🌆 🏙️ 🌃 🌌 🌉 🌁'.split(' ') },
+      { id: 'objects', title: 'Предметы', icon: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
+        list: '⌚ 📱 📲 💻 ⌨️ 🖥️ 🖨️ 🖱️ 🕹️ 💽 💾 💿 📀 📼 📷 📸 📹 🎥 📽️ 🎞️ 📞 ☎️ 📟 📠 📺 📻 🎙️ ⏱️ ⏰ 🕰️ ⌛ ⏳ 📡 🔋 🔌 💡 🔦 🕯️ 🧯 🛢️ 💸 💵 💴 💶 💷 🪙 💰 💳 💎 ⚖️ 🪜 🧰 🪛 🔧 🔨 ⚒️ 🛠️ ⛏️ 🪚 🔩 ⚙️ 🧱 ⛓️ 🧲 🔫 💣 🧨 🪓 🔪 🗡️ ⚔️ 🛡️ 🚬 ⚰️ 🪦 ⚱️ 🏺 🔮 📿 🧿 💈 ⚗️ 🔭 🔬 🕳️ 🩹 🩺 💊 💉 🩸 🧬 🦠 🧫 🧪 🌡️ 🧹 🪠 🧺 🧻 🚽 🚰 🚿 🛁 🛀 🧼 🪥 🪒 🧽 🪣 🧴 🛎️ 🔑 🗝️ 🚪 🪑 🛋️ 🛏️ 🛌 🧸 🪆 🖼️ 🪞 🪟 🛍️ 🛒 🎁 🎈 🎏 🎀 🪄 🪅 🎊 🎉 🎎 🏮 🎐 🧧 ✉️ 📩 📨 📧 💌 📥 📤 📦 🏷️ 📪 📫 📬 📭 📮 📯 📜 📃 📄 📑 🧾 📊 📈 📉 🗒️ 🗓️ 📆 📅 🗑️ 📇 🗃️ 🗳️ 🗄️ 📋 📁 📂 🗂️ 🗞️ 📰 📓 📔 📒 📕 📗 📘 📙 📚 📖 🔖 🧷 🔗 📎 🖇️ 📐 📏 🧮 📌 📍 ✂️ 🖊️ 🖋️ ✒️ 🖌️ 🖍️ 📝 ✏️ 🔍 🔎 🔏 🔐 🔒 🔓'.split(' ') },
+      { id: 'symbols', title: 'Символы', icon: '<path d="M4 4h7v7H4zM15.5 4a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zM4 20l3.5-6 3.5 6zM14 14l6 6M20 14l-6 6"/>',
+        list: '❤️ 🧡 💛 💚 💙 💜 🖤 🤍 🤎 💔 ❤️‍🔥 ❤️‍🩹 ❣️ 💕 💞 💓 💗 💖 💘 💝 💟 ☮️ ✝️ ☪️ 🕉️ ☸️ ✡️ 🔯 🕎 ☯️ ☦️ 🛐 ⛎ ♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓ 🆔 ⚛️ 🉑 ☢️ ☣️ 📴 📳 🈶 🈚 🈸 🈺 🈷️ ✴️ 🆚 💮 🉐 ㊙️ ㊗️ 🈴 🈵 🈹 🈲 🅰️ 🅱️ 🆎 🆑 🅾️ 🆘 ❌ ⭕ 🛑 ⛔ 📛 🚫 💯 💢 ♨️ 🚷 🚯 🚳 🚱 🔞 📵 🚭 ❗ ❕ ❓ ❔ ‼️ ⁉️ 🔅 🔆 〽️ ⚠️ 🚸 🔱 ⚜️ 🔰 ♻️ ✅ 🈯 💹 ❇️ ✳️ ❎ 🌐 💠 Ⓜ️ 🌀 💤 🏧 🚾 ♿ 🅿️ 🛗 🈳 🈂️ 🛂 🛃 🛄 🛅 🚹 🚺 🚼 ⚧️ 🚻 🚮 🎦 📶 🈁 🔣 ℹ️ 🔤 🔡 🔠 🆖 🆗 🆙 🆒 🆕 🆓 🔟 🔢 #️⃣ *️⃣ ⏏️ ▶️ ⏸️ ⏯️ ⏹️ ⏺️ ⏭️ ⏮️ ⏩ ⏪ ⏫ ⏬ ◀️ 🔼 🔽 ➡️ ⬅️ ⬆️ ⬇️ ↗️ ↘️ ↙️ ↖️ ↕️ ↔️ ↪️ ↩️ ⤴️ ⤵️ 🔀 🔁 🔂 🔄 🔃 🎵 🎶 ➕ ➖ ➗ ✖️ 🟰 ♾️ 💲 💱 ™️ ©️ ®️ 〰️ ➰ ➿ 🔚 🔙 🔛 🔝 🔜 ✔️ ☑️ 🔘 🔴 🟠 🟡 🟢 🔵 🟣 ⚫ ⚪ 🟤 🔺 🔻 🔸 🔹 🔶 🔷 🔳 🔲 ▪️ ▫️ ◾ ◽ ◼️ ◻️ 🟥 🟧 🟨 🟩 🟦 🟪 ⬛ ⬜ 🟫 🔈 🔇 🔉 🔊 🔔 🔕 📣 📢 💬 💭 🗯️ ♠️ ♣️ ♥️ ♦️ 🃏 🎴 🀄 🕐 🕑 🕒 🕓 🕔 🕕 🕖 🕗 🕘 🕙 🕚 🕛'.split(' ') },
+      { id: 'flags', title: 'Флаги', icon: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+        list: '🏳️ 🏴 🏁 🚩 🏳️‍🌈 🏴‍☠️ 🇷🇺 🇺🇦 🇧🇾 🇰🇿 🇺🇿 🇰🇬 🇹🇯 🇹🇲 🇦🇲 🇦🇿 🇬🇪 🇲🇩 🇱🇻 🇱🇹 🇪🇪 🇺🇸 🇬🇧 🇩🇪 🇫🇷 🇮🇹 🇪🇸 🇵🇹 🇳🇱 🇧🇪 🇨🇭 🇦🇹 🇵🇱 🇨🇿 🇸🇰 🇭🇺 🇷🇴 🇧🇬 🇷🇸 🇭🇷 🇬🇷 🇹🇷 🇨🇾 🇮🇱 🇦🇪 🇸🇦 🇪🇬 🇮🇳 🇨🇳 🇯🇵 🇰🇷 🇹🇭 🇻🇳 🇮🇩 🇦🇺 🇳🇿 🇨🇦 🇲🇽 🇧🇷 🇦🇷 🇨🇱 🇨🇴 🇵🇪 🇨🇺 🇿🇦 🇳🇬 🇰🇪 🇲🇦 🇸🇪 🇳🇴 🇫🇮 🇩🇰 🇮🇸 🇮🇪 🇪🇺 🇺🇳'.split(' ') },
+    ];
+
+    const emojiPanel = document.getElementById('emoji-panel');
+    const emojiScroll = document.getElementById('emoji-scroll');
+    const emojiTabs = document.getElementById('emoji-tabs');
+    const emojiToggle = document.getElementById('emoji-toggle');
+    const isTouch = matchMedia('(pointer: coarse)').matches;
+    const RECENT_KEY = 'doomsenger-recent-emoji';
+    const recentCategory = emojiCategories[0];
+    try { recentCategory.list = JSON.parse(localStorage.getItem(RECENT_KEY)) || []; } catch { recentCategory.list = []; }
+    const sectionEls = {};
+
+    function svgIcon(path) {
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+    }
+
+    function renderEmojiGrid(grid, list) {
+      grid.innerHTML = '';
+      list.forEach((emoji) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.emoji = emoji;
+        btn.append(emojiImg(emoji));
+        grid.append(btn);
+      });
+    }
+
+    // Строим клавиатуру один раз
+    emojiCategories.forEach((cat) => {
+      const section = document.createElement('section');
+      const title = document.createElement('div');
+      title.className = 'emoji-section-title';
+      title.textContent = cat.title;
+      const grid = document.createElement('div');
+      grid.className = 'emoji-grid';
+      section.append(title, grid);
+      emojiScroll.append(section);
+      sectionEls[cat.id] = { section, grid };
+      renderEmojiGrid(grid, cat.list);
+
+      const tab = document.createElement('button');
+      tab.type = 'button';
+      tab.title = cat.title;
+      tab.dataset.cat = cat.id;
+      tab.innerHTML = svgIcon(cat.icon);
+      tab.addEventListener('click', () => {
+        emojiScroll.scrollTop = section.offsetTop;
+      });
+      emojiTabs.append(tab);
+    });
+    // Кнопка «стереть», как на клавиатуре iPhone
+    const backspace = document.createElement('button');
+    backspace.type = 'button';
+    backspace.className = 'emoji-backspace';
+    backspace.title = 'Стереть';
+    backspace.innerHTML = svgIcon('<path d="M9 5h11v14H9l-6-7z"/><path d="M12 9.5l5 5M17 9.5l-5 5"/>');
+    emojiTabs.append(backspace);
+
+    function updateRecentSection() {
+      sectionEls.recent.section.style.display = recentCategory.list.length ? '' : 'none';
+      emojiTabs.querySelector('[data-cat="recent"]').style.display = recentCategory.list.length ? '' : 'none';
+      highlightEmojiTab();
+    }
+
+    // Подсвечиваем категорию, которую сейчас видно
+    function highlightEmojiTab() {
+      let current = null;
+      emojiCategories.forEach((cat) => {
+        const { section } = sectionEls[cat.id];
+        if (section.style.display !== 'none' && section.offsetTop <= emojiScroll.scrollTop + 10) current = cat.id;
+      });
+      if (!current) current = emojiCategories.find((cat) => sectionEls[cat.id].section.style.display !== 'none').id;
+      emojiTabs.querySelectorAll('[data-cat]').forEach((t) => t.classList.toggle('active', t.dataset.cat === current));
+    }
+    emojiScroll.addEventListener('scroll', highlightEmojiTab);
+
+    // --- Поле ввода со смайликами-картинками ---
+    // Текст поля: картинки эмодзи превращаются обратно в символы
+    function textOf(node) {
+      let text = '';
+      node.childNodes.forEach((child) => {
+        if (child.nodeType === Node.TEXT_NODE) text += child.data;
+        else if (child.nodeName === 'IMG') text += child.alt || '';
+        else if (child.nodeName !== 'BR') text += textOf(child);
+      });
+      return text;
+    }
+    function getInputText() { return textOf(messageInput); }
+
+    // Положение курсора (в символах текста), запоминаем — на телефоне поле теряет фокус
+    let savedCaret = null;
+    function caretOffset(container, offset) {
+      const range = document.createRange();
+      range.selectNodeContents(messageInput);
+      range.setEnd(container, offset);
+      return textOf(range.cloneContents()).length;
+    }
+    function readCaret() {
+      const sel = getSelection();
+      // Без фокуса выделение могло устареть после перерисовки — тогда верим сохранённому
+      if (document.activeElement !== messageInput || !sel.rangeCount || !messageInput.contains(sel.anchorNode)) return null;
+      const range = sel.getRangeAt(0);
+      return { start: caretOffset(range.startContainer, range.startOffset), end: caretOffset(range.endContainer, range.endOffset) };
+    }
+    document.addEventListener('selectionchange', () => {
+      const caret = readCaret();
+      if (caret) savedCaret = caret;
+    });
+
+    // Ставит курсор на позицию pos в тексте поля
+    function placeCaret(pos) {
+      savedCaret = { start: pos, end: pos };
+      if (isTouch && document.activeElement !== messageInput) return; // не открываем системную клавиатуру
+      const range = document.createRange();
+      let left = pos;
+      let placed = false;
+      for (const child of messageInput.childNodes) {
+        const len = child.nodeType === Node.TEXT_NODE ? child.data.length : (child.alt || '').length;
+        if (left <= len) {
+          if (child.nodeType === Node.TEXT_NODE) range.setStart(child, left);
+          else if (left === 0) range.setStartBefore(child);
+          else range.setStartAfter(child);
+          placed = true;
+          break;
+        }
+        left -= len;
+      }
+      if (!placed) range.selectNodeContents(messageInput);
+      range.collapse(placed);
+      const sel = getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+
+    // Перерисовывает поле: эмодзи — картинками Apple, как в переписке
+    function setInputText(text, pos) {
+      messageInput.textContent = '';
+      appendEmojiText(messageInput, text);
+      placeCaret(Math.min(pos, text.length));
+    }
+
+    // Заменяет выделение (или вставляет в место курсора) на text
+    function replaceSelection(text, from, to) {
+      const value = getInputText();
+      setInputText(value.slice(0, from) + text + value.slice(to), from + text.length);
+    }
+    function currentCaret() {
+      const length = getInputText().length;
+      const caret = readCaret() || savedCaret || { start: length, end: length };
+      return { start: Math.min(caret.start, length), end: Math.min(caret.end, length) };
+    }
+
+    // Вставка эмодзи в место курсора
+    function insertAtCursor(text) {
+      const { start, end } = currentCaret(); // до focus(): он может сбросить курсор в начало
+      if (!isTouch) messageInput.focus();
+      replaceSelection(text, start, end);
+    }
+
+    // Смайлики, набранные с системной клавиатуры, тоже превращаем в картинки
+    messageInput.addEventListener('input', (e) => {
+      if (e.isComposing) return;
+      const hasRawEmoji = [...messageInput.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && emojiRe.test(n.data));
+      const hasJunk = [...messageInput.childNodes].some((n) => n.nodeType !== Node.TEXT_NODE && !(n.nodeName === 'IMG' && n.classList.contains('emoji')));
+      if (!getInputText()) { messageInput.textContent = ''; return; } // чтобы снова показалась подсказка
+      if (hasRawEmoji || hasJunk) {
+        const caret = readCaret();
+        setInputText(getInputText(), caret ? caret.end : getInputText().length);
+      }
+    });
+    // Enter отправляет сообщение, переносов строк нет
+    messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.isComposing) {
+        e.preventDefault();
+        composer.requestSubmit();
+      }
+    });
+    // Вставляем только простой текст
+    messageInput.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData.getData('text/plain') || '').replace(/\s*\n\s*/g, ' ');
+      const { start, end } = currentCaret();
+      replaceSelection(text, start, end);
+    });
+    messageInput.addEventListener('drop', (e) => e.preventDefault());
+
+    function rememberEmoji(emoji) {
+      const list = [emoji, ...recentCategory.list.filter((e) => e !== emoji)].slice(0, 24);
+      recentCategory.list = list;
+      try { localStorage.setItem(RECENT_KEY, JSON.stringify(list)); } catch {}
+    }
+
+    emojiScroll.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-emoji]');
+      if (!btn) return;
+      insertAtCursor(btn.dataset.emoji);
+      rememberEmoji(btn.dataset.emoji);
+    });
+
+    // Стирает последний символ (эмодзи целиком) перед курсором
+    backspace.addEventListener('click', () => {
+      const { start, end } = currentCaret();
+      if (!isTouch) messageInput.focus();
+      let from = start;
+      if (start === end) {
+        const parts = [...graphemes.segment(getInputText().slice(0, start))];
+        if (!parts.length) return;
+        from = start - parts[parts.length - 1].segment.length;
+      }
+      replaceSelection('', from, end);
+    });
+
+    // Не забираем фокус у поля ввода при нажатиях в клавиатуре
+    emojiPanel.addEventListener('mousedown', (e) => e.preventDefault());
+
+    function openEmojiPanel() {
+      // «Часто используемые» обновляем при каждом открытии, чтобы сетка не прыгала во время выбора
+      renderEmojiGrid(sectionEls.recent.grid, recentCategory.list);
+      emojiPanel.classList.add('open');
+      emojiToggle.classList.add('active');
+      emojiScroll.scrollTop = 0;
+      updateRecentSection();
+      if (isTouch) messageInput.blur(); // прячем системную клавиатуру — вместо неё эмодзи
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function closeEmojiPanel() {
+      emojiPanel.classList.remove('open');
+      emojiToggle.classList.remove('active');
+    }
+
+    emojiToggle.addEventListener('click', () => {
+      if (emojiPanel.classList.contains('open')) {
+        closeEmojiPanel();
+        messageInput.focus();
+      } else {
+        openEmojiPanel();
+      }
+    });
+    // На телефоне касание поля ввода возвращает обычную клавиатуру
+    messageInput.addEventListener('focus', () => { if (isTouch) closeEmojiPanel(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeEmojiPanel(); });
+
+    // Ответ собеседника (генерируется на сервере)
+    async function requestReply(chat) {
+      if (chat.typing) return; // ответ уже готовится — новые сообщения учтутся следом
+      chat.typing = true;
+      // Собеседник прочитал всё, что успело прийти
+      chat.messages.forEach((m) => { if (m.fromMe !== false) m.seen = true; });
+      if (chat === activeChat) renderMessages();
+      const sentCount = chat.messages.length;
+      let text;
+      try {
+        const res = await fetch('/api/reply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat: chat.name,
+            userName: user.firstName,
+            messages: chat.messages.map((m) => ({ text: m.text, fromMe: m.fromMe !== false })),
+          }),
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        text = (await res.json()).text;
+      } catch (err) {
+        console.error(err);
+      }
+      chat.typing = false;
+      const hasNew = chat.messages.length > sentCount;
+      if (text) {
+        // Ответ встаёт сразу после сообщений, на которые он отвечает
+        chat.messages.splice(sentCount, 0, { text, time: new Date(), fromMe: false });
+        if (!hasNew) chat.lastMessage = text;
+      }
+      if (chat === activeChat) renderMessages();
+      renderChats();
+      // Пока ждали ответ, пришли новые сообщения — отвечаем и на них
+      if (text && hasNew) requestReply(chat);
+    }
+
+    // Назад к списку чатов (на мобильных)
+    document.getElementById('chat-back').addEventListener('click', () => {
+      mainScreen.classList.remove('chat-open');
+      closeEmojiPanel();
+    });
+
+    // Добавление нового чата: { name, lastMessage, color }
+    function addChat(chat) {
+      chats.unshift({ messages: [], ...chat });
+      renderChats();
+    }
+
+    // Фильтрация чатов по имени и последнему сообщению.
+    // Запрос делится на слова — чат подходит, если содержит каждое из них.
+    function applySearch() {
+      const words = search.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      let visible = 0;
+      document.querySelectorAll('.chat-item').forEach((item) => {
+        const text = item.textContent.toLowerCase();
+        const match = words.every((word) => text.includes(word));
+        item.style.display = match ? 'flex' : 'none';
+        if (match) visible++;
+      });
+      const searching = words.length > 0;
+      // Пустое состояние — только когда чатов нет и ничего не ищем
+      noChats.style.display = !chats.length && !searching ? 'flex' : 'none';
+      noResults.style.display = searching && !visible ? 'block' : 'none';
+    }
+    search.addEventListener('input', applySearch);
+
+    // --- Профиль пользователя ---
+    const user = { nick: '', firstName: '', lastName: '', email: '', phone: '', dob: '', about: '', photo: '' };
+    let accounts = [];
+    const profileAvatar = document.getElementById('profile-avatar');
+    const profilePage = document.getElementById('profile-page');
+    const accountsList = document.getElementById('accounts-list');
+    const addModal = document.getElementById('add-account-modal');
+
+    // Инициалы: первые буквы первых двух слов ника
+    function initials() {
+      return user.nick.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => Array.from(w)[0]).join('').toUpperCase();
+    }
+
+    function formatDate(value) {
+      if (!value) return '—';
+      const [y, m, d] = value.split('-');
+      return `${d}.${m}.${y}`;
+    }
+
+    function renderAccounts() {
+      accountsList.innerHTML = '';
+      accounts.forEach((email) => {
+        const li = document.createElement('li');
+        li.textContent = email;
+        accountsList.append(li);
+      });
+    }
+
+    function fillProfile() {
+      [profileAvatar, document.getElementById('profile-big-avatar')].forEach((el) => {
+        el.textContent = initials();
+        el.classList.toggle('has-photo', Boolean(user.photo));
+        el.style.backgroundImage = user.photo ? `url("${user.photo}")` : '';
+      });
+      document.getElementById('profile-name').textContent = user.nick;
+      document.getElementById('profile-nick').value = user.nick;
+      document.getElementById('profile-email').textContent = user.email;
+      document.getElementById('profile-phone').textContent = user.phone;
+      document.getElementById('profile-birthday').textContent = formatDate(user.dob);
+      document.getElementById('profile-about').value = user.about;
+      renderAccounts();
+    }
+
+    profileAvatar.addEventListener('click', () => { profilePage.style.display = 'flex'; });
+    document.getElementById('profile-close').addEventListener('click', () => { profilePage.style.display = 'none'; });
+    profilePage.addEventListener('click', (e) => { if (e.target === profilePage) profilePage.style.display = 'none'; });
+
+    // Смена аватарки: значок фотоаппарата открывает выбор фото на компьютере
+    const avatarFile = document.getElementById('avatar-file');
+    document.getElementById('avatar-picker').addEventListener('click', () => avatarFile.click());
+    avatarFile.addEventListener('change', () => {
+      const file = avatarFile.files[0];
+      avatarFile.value = ''; // чтобы можно было снова выбрать тот же файл
+      if (!file || !file.type.startsWith('image/')) return;
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        // Обрезаем по центру в квадрат и уменьшаем, чтобы не хранить огромную картинку
+        const size = Math.min(img.naturalWidth, img.naturalHeight);
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = Math.min(size, 400);
+        canvas.getContext('2d').drawImage(img, (img.naturalWidth - size) / 2, (img.naturalHeight - size) / 2, size, size, 0, 0, canvas.width, canvas.height);
+        user.photo = canvas.toDataURL('image/jpeg', 0.9);
+        URL.revokeObjectURL(url);
+        fillProfile();
+        saveProfile({ photo: user.photo });
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        alert('Не удалось открыть это изображение');
+      };
+      img.src = url;
+    });
+
+    // Переключение вкладок
+    document.querySelectorAll('.tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t === tab));
+        document.querySelectorAll('.tab-panel').forEach((panel) => {
+          panel.classList.toggle('active', panel.id === `tab-${tab.dataset.tab}`);
+        });
+      });
+    });
+
+    // Смена ника
+    document.getElementById('nick-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nick = document.getElementById('profile-nick').value.trim();
+      if (!nick) return;
+      user.nick = nick;
+      fillProfile();
+      saveProfile({ nick });
+      document.getElementById('nick-saved').textContent = 'Сохранено';
+      setTimeout(() => { document.getElementById('nick-saved').textContent = ''; }, 2000);
+    });
+
+    // «О себе»
+    document.getElementById('about-save').addEventListener('click', () => {
+      user.about = document.getElementById('profile-about').value.trim();
+      saveProfile({ about: user.about });
+      document.getElementById('about-saved').textContent = 'Сохранено';
+      setTimeout(() => { document.getElementById('about-saved').textContent = ''; }, 2000);
+    });
+
+    // Добавление аккаунта
+    document.getElementById('add-account-open').addEventListener('click', () => {
+      addModal.style.display = 'flex';
+      document.getElementById('new-email').focus();
+    });
+    document.getElementById('add-account-close').addEventListener('click', () => { addModal.style.display = 'none'; });
+    document.getElementById('add-account-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('new-email');
+      const email = input.value.trim();
+      if (email && !accounts.includes(email)) accounts.push(email);
+      renderAccounts();
+      input.value = '';
+      addModal.style.display = 'none';
+    });
+
+    // Выход из аккаунта: возвращаемся на экран входа/регистрации
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      api('/api/auth/logout', 'POST').catch(() => {});
+      localStorage.removeItem(TOKEN_KEY);
+      Object.keys(user).forEach((key) => { user[key] = ''; });
+      accounts = [];
+      // Сбрасываем переписку и открытый чат
+      // (новые объекты — чтобы ответ, который ещё готовится, не попал в чужую переписку)
+      chats.splice(0, chats.length, ...chats.map(({ name, color }) => ({ name, color, lastMessage: '', messages: [] })));
+      activeChat = null;
+      viewHeader.style.display = '';
+      composer.style.display = '';
+      messagesEl.innerHTML = '';
+      messagesEl.style.display = '';
+      viewBody.style.display = '';
+      viewHint.textContent = 'Выберите чат, чтобы начать переписку';
+      mainScreen.classList.remove('chat-open');
+      closeEmojiPanel();
+      renderChats();
+      profilePage.style.display = 'none';
+      document.querySelector('.tab[data-tab="account"]').click();
+      mainScreen.style.display = 'none';
+      regScreen.style.display = 'flex';
+      showAuth(authChoice);
+    });
+
+    renderChats();
+
+    // Если пользователь уже входил — восстанавливаем сессию
+    if (localStorage.getItem(TOKEN_KEY)) {
+      regScreen.style.visibility = 'hidden';
+      api('/api/me')
+        .then(enterApp)
+        .catch((err) => { if (err.status === 401) localStorage.removeItem(TOKEN_KEY); })
+        .finally(() => {
+          regScreen.style.visibility = '';
+          if (regScreen.style.display !== 'none') showAuth(authChoice);
+        });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://illustrious-sunburst-92328f.netlify.app/sitemap.xml
